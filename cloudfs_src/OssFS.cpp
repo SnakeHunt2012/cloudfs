@@ -16,8 +16,8 @@
 #include <string>
 #include <algorithm>
 #include <syslog.h>
-#include <unistd.h
-#include <sys/types.h
+#include <unistd.h>
+#include <sys/types.h>
 #include <time.h>
 #include <curl/curl.h>
 #include "cloudfs_sqlite.h"
@@ -277,8 +277,8 @@ OssFS::OssFS()
 	curl_global_init(CURL_GLOBAL_ALL);
 	
 	pthread_mutexattr_t mutexattr;
-	pthread_mutexattr_init(&mutexattr)
-	pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE)
+	pthread_mutexattr_init(&mutexattr);
+        pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE);
 
 	pthread_mutex_init(&m_online_sync_mutex, &mutexattr);
 
@@ -424,8 +424,8 @@ int OssFS::init_file()
 
 	int ret_code = 0;
 
-	printf("Start to load object from oss: \n")
-	time_t t_start = time(0)
+	printf("Start to load object from oss: \n");
+        time_t t_start = time(0);
 	// 通过 Get Bucket 接口从服务器上取出这个Bucket下根目录的meta信息
 	ret_code = m_oss->get_bucket(AliConf::BUCKET.c_str(), "", "/", objects);
 	if (0 != ret_code)
@@ -434,16 +434,16 @@ int OssFS::init_file()
 		exit(-1);
 	}
 
-	time_t t_get_bucket_end = time(0)
-	printf("get_bucket finished: time cost %ld second\n", (t_get_bucket_end-t_start))
+	time_t t_get_bucket_end = time(0);
+	printf("get_bucket finished: time cost %ld second\n", (t_get_bucket_end-t_start));
 	m_files.insert(pair<const char*, OSS_OBJS_MAP *>(AliConf::BUCKET.c_str(), m_root->get_subs()));
 
-	time_t t_end_insert = time(0)
-	printf("insert root node: time cost %ld second\n", (t_end_insert-t_get_bucket_end))
+	time_t t_end_insert = time(0);
+        printf("insert root node: time cost %ld second\n", (t_end_insert-t_get_bucket_end));
 	// 加载文件meta信息到内存
 	load_files(objects, true, 0);
-	time_t t_end_load = time(0)
-	printf("load_files: time cost %ld second\n", (t_end_load-t_end_insert))
+	time_t t_end_load = time(0);
+	printf("load_files: time cost %ld second\n", (t_end_load-t_end_insert));
 		
 	return 0;
 }
@@ -816,9 +816,8 @@ int OssFS::mkdir(const char *path, mode_t mode)
 	}
 
 	OSS_FILE_META meta;
-	obj->get_stats()->to_meta(meta)
-    m_oss->put_object_data(AliConf::BUCKET.c_str(), obj->get_path_name(), meta);
-
+	obj->get_stats()->to_meta(meta);
+        m_oss->put_object_data(AliConf::BUCKET.c_str(), obj->get_path_name(), meta);
 
 	return 0;
 }
