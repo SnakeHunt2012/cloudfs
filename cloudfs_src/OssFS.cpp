@@ -16,8 +16,8 @@
 #include <string>
 #include <algorithm>
 #include <syslog.h>
-#include <unistd.h>
-#include <sys/types.h>
+#include <unistd.h
+#include <sys/types.h
 #include <time.h>
 #include <curl/curl.h>
 #include "cloudfs_sqlite.h"
@@ -59,13 +59,13 @@ void* upload_part_copy_task(void* args)
 	UploadPartCopy* part = (UploadPartCopy *)args;
 	
 	string ret = part->oss->upload_part_copy(
-					part->bucket.c_str(),		//bucketÃû×Ö
-					part->object.c_str(),		//¸´ÖÆµÄÔ´objectÃû×Ö
-					part->s_object.c_str(),		//copy²Ù×÷Ê±µÄÔ´¶ÔÏó
+					part->bucket.c_str(),		//bucketåå­—
+					part->object.c_str(),		//å¤åˆ¶çš„æºobjectåå­—
+					part->s_object.c_str(),		//copyæ“ä½œæ—¶çš„æºå¯¹è±¡
 					part->uploadid.c_str(),		//uploadid
-					part->part_num,				//partºÅ
-					part->start_pos, 			//±¾partµÄ¿ªÊ¼Êı¾İ×Ö½Ú
-					part->end_pos);				//±¾partµÄ½áÊøÊı¾İ×Ö½Ú
+					part->part_num,				//partå·
+					part->start_pos, 			//æœ¬partçš„å¼€å§‹æ•°æ®å­—èŠ‚
+					part->end_pos);				//æœ¬partçš„ç»“æŸæ•°æ®å­—èŠ‚
 	if (ret == "") {
 		log_error("upload part copy failed. source object[%s], destination object[%s], m_part_num: %d", 
 					part->s_object.c_str(), part->object.c_str(), part->part_num);
@@ -90,25 +90,25 @@ void convert_object_to_meta(oss_object_desc_t *pObject, OSS_FILE_META &meta)
 {
 	stringstream ss, oss_type;
 	
-	/* »ñÈ¡¶ÔÏóµÄSize */
+	/* è·å–å¯¹è±¡çš„Size */
 	ss << pObject->size;
 	meta["size"] = ss.str();
 
 	log_debug("meta size: %s", meta["size"].c_str());
 
-	/* ÅĞ¶Ï¶ÔÏóµÄÀàĞÍ 
-	ÎÄ¼ş¼ĞµÄnameĞÎÈç: a/b/c/
-	ÆäËûÎÄ¼şµÄnameĞÎÈç: a.txt a/b/c.tar
+	/* åˆ¤æ–­å¯¹è±¡çš„ç±»å‹ 
+	æ–‡ä»¶å¤¹çš„nameå½¢å¦‚: a/b/c/
+	å…¶ä»–æ–‡ä»¶çš„nameå½¢å¦‚: a.txt a/b/c.tar
 	*/
 	if (pObject->name[pObject->name.size()-1] == '/')
 	{
-		/* ×îºóÒ»¸ö×Ö·ûÎª'/', ËµÃ÷¸Ã¶ÔÏóÎªÄ¿Â¼¶ÔÏó */
+		/* æœ€åä¸€ä¸ªå­—ç¬¦ä¸º'/', è¯´æ˜è¯¥å¯¹è±¡ä¸ºç›®å½•å¯¹è±¡ */
 		oss_type << OSS_DIR;
 		
 	}
 	else
 	{
-		//¼ì²é¸ÃÎÄ¼şÊÇ·ñ´øÓĞºó×ºÎªAliConf::SYMLINK_TYPE_NAME, ¼ì²éÊÇ²»ÊÇÈíÁ¬½ÓÎÄ¼ş
+		//æ£€æŸ¥è¯¥æ–‡ä»¶æ˜¯å¦å¸¦æœ‰åç¼€ä¸ºAliConf::SYMLINK_TYPE_NAME, æ£€æŸ¥æ˜¯ä¸æ˜¯è½¯è¿æ¥æ–‡ä»¶
 		int object_name_len = pObject->name.length();
 		int symlink_postfix_len = AliConf::SYMLINK_TYPE_NAME.length();
 		if (object_name_len > (symlink_postfix_len+1))
@@ -117,18 +117,18 @@ void convert_object_to_meta(oss_object_desc_t *pObject, OSS_FILE_META &meta)
 			{
 				oss_type << OSS_LINK;
 
-				//½«ÈíÁ¬½ÓµÄÃû×ÖÈ¥µôAliConf::SYMLINK_TYPE_NAMEºó×º, ÕâÀïĞèÒª°Ñ".1s2l3k"È«²¿È¥µô
+				//å°†è½¯è¿æ¥çš„åå­—å»æ‰AliConf::SYMLINK_TYPE_NAMEåç¼€, è¿™é‡Œéœ€è¦æŠŠ".1s2l3k"å…¨éƒ¨å»æ‰
 				pObject->name = pObject->name.substr(0, (object_name_len-(symlink_postfix_len+1)));
 			}
 			else
 			{
-				//ÆÕÍ¨ÎÄ¼ş
+				//æ™®é€šæ–‡ä»¶
 				oss_type << OSS_REGULAR;				
 			}
 		}
 		else
 		{
-			//ÆÕÍ¨ÎÄ¼ş
+			//æ™®é€šæ–‡ä»¶
 			oss_type << OSS_REGULAR;
 		}
 	}
@@ -137,7 +137,7 @@ void convert_object_to_meta(oss_object_desc_t *pObject, OSS_FILE_META &meta)
 	
 	log_debug("meta type: %s", meta["type"].c_str());
 
-	// ´¦Àímodified timeÊôĞÔ, Èç¹û¶ÔÏó±¾ÉíĞ¯´øÁËx-oss-meta-mtime
+	// å¤„ç†modified timeå±æ€§, å¦‚æœå¯¹è±¡æœ¬èº«æºå¸¦äº†x-oss-meta-mtime
 	stringstream oss_time;
 	oss_time << time(0);
 	meta["mtime"] = oss_time.str();
@@ -184,7 +184,7 @@ void create_group_stats(size_t file_size, time_t file_time,std::vector<OssStats 
 void delete_group_stats(vector<OssStats *>& vStats)
 
 {
-	//subobject²»ÔÙĞèÒª±£´æstats, ´Ë´¦Ñ­»·ÊÍ·ÅËùÓĞµÄstat
+	//subobjectä¸å†éœ€è¦ä¿å­˜stats, æ­¤å¤„å¾ªç¯é‡Šæ”¾æ‰€æœ‰çš„stat
 	std::vector<OssStats *>::iterator stat_it = vStats.begin();
 	for (;stat_it != vStats.end(); stat_it++)
 	{
@@ -231,7 +231,7 @@ void OssFS::uplodid_undone_proc()
 		}
 	}
 
-	/* Ìá½»Íê³Éºó, Çå¿ÕÔ­À´µÄuploadid list */
+	/* æäº¤å®Œæˆå, æ¸…ç©ºåŸæ¥çš„uploadid list */
 	m_uploadid_file.ClearUploadList();
 	
 }
@@ -244,7 +244,7 @@ OssFS::OssFS()
 	m_file_count = 0;
 	m_cache_size = 0;
 
-	// ´´½¨Ò»¸ö /var/log/cloudfsÄ¿Â¼£¬ÓÃÓÚ´æ·ÅÈÕÖ¾ÎÄ¼ş
+	// åˆ›å»ºä¸€ä¸ª /var/log/cloudfsç›®å½•ï¼Œç”¨äºå­˜æ”¾æ—¥å¿—æ–‡ä»¶
 	if (0 != create_dir("/var/log/cloudfs"))
 	{
 		printf("create dir[/var/log/cloudfs] failed.\n");
@@ -253,10 +253,10 @@ OssFS::OssFS()
 
 	log_error("CloudFS Version:%s", CLOUDFS_VERSION_INFO);
 
-	// ¶ÁÈ¡ ./conf/AliFS.conf ÅäÖÃÎÄ¼şµ½ÄÚ´æ
+	// è¯»å– ./conf/AliFS.conf é…ç½®æ–‡ä»¶åˆ°å†…å­˜
 	AliConf::INIT();
 
-	// ³õÊ¼»¯sqlite Êı¾İ¿â
+	// åˆå§‹åŒ–sqlite æ•°æ®åº“
 	int rc = cloudfs_sqlite_init(AliConf::SQLITE_FILE_PATH.c_str());
 	if (0 != rc)
 	{
@@ -265,31 +265,31 @@ OssFS::OssFS()
 	}
 	
 
-	// ÉèÖÃÈÕÖ¾´òÓ¡¼¶±ğ
+	// è®¾ç½®æ—¥å¿—æ‰“å°çº§åˆ«
 	log_init(AliConf::LOG_LEVEL);
 	
-	// ³õÊ¼»¯°¢ÀïÔÆ·şÎñÖ÷»úµÄĞÅÏ¢£¬ºóĞøÊ¹ÓÃ
+	// åˆå§‹åŒ–é˜¿é‡Œäº‘æœåŠ¡ä¸»æœºçš„ä¿¡æ¯ï¼Œåç»­ä½¿ç”¨
 	m_oss = new Oss();
 	m_oss->init(AliConf::HOST.c_str(), AliConf::ID.c_str(),
 			AliConf::KEY.c_str());
 
-	// ³õÊ¼»¯ CRULÈ«¾Ö»·¾³
+	// åˆå§‹åŒ– CRULå…¨å±€ç¯å¢ƒ
 	curl_global_init(CURL_GLOBAL_ALL);
 	
 	pthread_mutexattr_t mutexattr;
-	pthread_mutexattr_init(&mutexattr);
-	pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutexattr_init(&mutexattr)
+	pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE)
 
 	pthread_mutex_init(&m_online_sync_mutex, &mutexattr);
 
 	pthread_mutexattr_destroy(&mutexattr);
 	
-	// ²éÕÒ±¾µØuploadIDÎÄ¼ş£¬¿´ÊÇ·ñÓĞmultipart ÎÄ¼şÎ´Ìá½»
-	// Õâ¸ö²Ù×÷Ò»¶¨Òª·ÅÔÚList Bucket²Ù×÷Ö®Ç°
+	// æŸ¥æ‰¾æœ¬åœ°uploadIDæ–‡ä»¶ï¼Œçœ‹æ˜¯å¦æœ‰multipart æ–‡ä»¶æœªæäº¤
+	// è¿™ä¸ªæ“ä½œä¸€å®šè¦æ”¾åœ¨List Bucketæ“ä½œä¹‹å‰
 	this->uplodid_undone_proc();
 
-	// ÊµÀı»¯Ò»¸ö Bucket Àà
-	// Õâ¸öÀàÊÕ¼¯ÁËÕâ¸öBucketÏÂËùÓĞÎÄ¼şµÄmetaĞÅÏ¢£¬·Ç³£ÖØÒª
+	// å®ä¾‹åŒ–ä¸€ä¸ª Bucket ç±»
+	// è¿™ä¸ªç±»æ”¶é›†äº†è¿™ä¸ªBucketä¸‹æ‰€æœ‰æ–‡ä»¶çš„metaä¿¡æ¯ï¼Œéå¸¸é‡è¦
 	m_root = new OssDirObject(this, m_oss, AliConf::BUCKET.c_str(), "/", "/",
 			new OssStats(4096, 0, OSS_DIR));
 	this->init_file();
@@ -329,7 +329,7 @@ OssObject * OssFS::add_file(const char* path,
 			}
 			else 
 			{
-				// µ±Ò»¸öÂ·¾¶ÖĞµÄÄ³¸ö×ÓÂ·¾¶ÔÚÏµÍ³ÖĞ»¹Ã»ÓĞ±»´´½¨Ê± 
+				// å½“ä¸€ä¸ªè·¯å¾„ä¸­çš„æŸä¸ªå­è·¯å¾„åœ¨ç³»ç»Ÿä¸­è¿˜æ²¡æœ‰è¢«åˆ›å»ºæ—¶ 
 				tmpType = OSS_DIR;
 				tmpFilename.clear();
 				for (size_t j = 0; j <= i; j++)
@@ -394,14 +394,14 @@ int OssFS::del_file(const char *path)
 		return -ENOENT;
 	}
 	
-	//ÏÈÉ¾³ıOSS¶ÔÏó
+	//å…ˆåˆ é™¤OSSå¯¹è±¡
 	obj->delete_oss_object();
 
-	//É¾³ımeta_dbÖĞµÄ¼ÇÂ¼
+	//åˆ é™¤meta_dbä¸­çš„è®°å½•
 	string tmpPath = obj->get_path_name();
 	cloudfs_sqlite_remove_file_meta(tmpPath);
 
-	//É¾³ı¸¸Ä¿Â¼ÖĞµÄ¼ÇÂ¼
+	//åˆ é™¤çˆ¶ç›®å½•ä¸­çš„è®°å½•
 	OssDirObject *parent_dir = (OssDirObject *)get_parent(path);
 	if (parent_dir != NULL)
 	{		
@@ -419,14 +419,14 @@ int OssFS::del_file(const char *path)
 int OssFS::init_file() 
 {
 	//OSS_FILE_MAP objects;
-	vector<oss_object_desc_t> objects;	//GET BUCKET»ñÈ¡µ½µÄËùÓĞobjectĞÅÏ¢
+	vector<oss_object_desc_t> objects;	//GET BUCKETè·å–åˆ°çš„æ‰€æœ‰objectä¿¡æ¯
 	OSS_OBJS_MAP bucket_files;
 
 	int ret_code = 0;
 
-	printf("Start to load object from oss: \n");
-	time_t t_start = time(0);
-	// Í¨¹ı Get Bucket ½Ó¿Ú´Ó·şÎñÆ÷ÉÏÈ¡³öÕâ¸öBucketÏÂ¸ùÄ¿Â¼µÄmetaĞÅÏ¢
+	printf("Start to load object from oss: \n")
+	time_t t_start = time(0)
+	// é€šè¿‡ Get Bucket æ¥å£ä»æœåŠ¡å™¨ä¸Šå–å‡ºè¿™ä¸ªBucketä¸‹æ ¹ç›®å½•çš„metaä¿¡æ¯
 	ret_code = m_oss->get_bucket(AliConf::BUCKET.c_str(), "", "/", objects);
 	if (0 != ret_code)
 	{
@@ -434,16 +434,16 @@ int OssFS::init_file()
 		exit(-1);
 	}
 
-	time_t t_get_bucket_end = time(0);
-	printf("get_bucket finished: time cost %ld second\n", (t_get_bucket_end-t_start));
+	time_t t_get_bucket_end = time(0)
+	printf("get_bucket finished: time cost %ld second\n", (t_get_bucket_end-t_start))
 	m_files.insert(pair<const char*, OSS_OBJS_MAP *>(AliConf::BUCKET.c_str(), m_root->get_subs()));
 
-	time_t t_end_insert = time(0);
-	printf("insert root node: time cost %ld second\n", (t_end_insert-t_get_bucket_end));
-	// ¼ÓÔØÎÄ¼şmetaĞÅÏ¢µ½ÄÚ´æ
+	time_t t_end_insert = time(0)
+	printf("insert root node: time cost %ld second\n", (t_end_insert-t_get_bucket_end))
+	// åŠ è½½æ–‡ä»¶metaä¿¡æ¯åˆ°å†…å­˜
 	load_files(objects, true, 0);
-	time_t t_end_load = time(0);
-	printf("load_files: time cost %ld second\n", (t_end_load-t_end_insert));
+	time_t t_end_load = time(0)
+	printf("load_files: time cost %ld second\n", (t_end_load-t_end_insert))
 		
 	return 0;
 }
@@ -459,13 +459,13 @@ OssObject* OssFS::get_parent(const char* path)
 		return NULL;
 	}
 
-	//¼ÓÉÏ×îÇ°ÃæµÄ'/'
+	//åŠ ä¸Šæœ€å‰é¢çš„'/'
 	if (strPath.at(0) != '/')
 	{
 		strPath = "/" + strPath;
 	}
 
-	//È¥µô×îºóÃæµÄ'/'
+	//å»æ‰æœ€åé¢çš„'/'
 	if (strPath.at(strPath.length()-1) == '/')
 	{
 		strPath = strPath.substr(0, strPath.length()-1);
@@ -474,12 +474,12 @@ OssObject* OssFS::get_parent(const char* path)
 	size_t last_pos = strPath.rfind('/');
 	if (last_pos == string::npos)
 	{
-		//pathÀïÃæÃ»ÓĞÕÒµ½'/', Ö±½Ó·µ»ØÊ§°Ü
+		//pathé‡Œé¢æ²¡æœ‰æ‰¾åˆ°'/', ç›´æ¥è¿”å›å¤±è´¥
 		log_error("find last / failed");
 		return NULL;
 	}
 
-	//¹¹Ôì¸¸Ä¿Â¼µÄpath
+	//æ„é€ çˆ¶ç›®å½•çš„path
 	string parent_dir_path = strPath.substr(0, (last_pos+1));
 
 	return get_file(parent_dir_path.c_str());
@@ -487,22 +487,22 @@ OssObject* OssFS::get_parent(const char* path)
 }
 
 
-// ÏÂÃæ×öµÄ¹¤×÷¾ÍÊÇÎªÃ¿¸öÎÄ¼şÊµÀı»¯Ò»¸öÏàÓ¦µÄÀà
-// Ä¿Â¼ÎÄ¼şÊµÀı»¯Îª OssDirObject 
+// ä¸‹é¢åšçš„å·¥ä½œå°±æ˜¯ä¸ºæ¯ä¸ªæ–‡ä»¶å®ä¾‹åŒ–ä¸€ä¸ªç›¸åº”çš„ç±»
+// ç›®å½•æ–‡ä»¶å®ä¾‹åŒ–ä¸º OssDirObject 
 int OssFS::load_files(vector<oss_object_desc_t>& objects, bool initial_load, size_t sync_flag)
 {
 	std::vector<OssStats *> group_stats;
 	vector<oss_object_desc_t>::iterator iter;
 	OSS_FILE_META meta;
-	OssObject *tmpObj = NULL;	
+	OssObject *tmpObj = NULL;
 
 	for (iter = objects.begin(); iter != objects.end(); iter++) 
 	{
 		meta.clear();
 		convert_object_to_meta(&(*iter), meta);
 
-		//ÏÈ¼ì²é±¾¸ÃÎÄ¼şÊÇ·ñÒÑ¾­´æÔÚ, Èç¹ûÒÑ¾­´æÔÚÔò²»ĞèÒª¼ÓÔØ
-		//µÚÒ»´ÎµÄÈ«Á¿¼ÓÔØ²»½øĞĞ±¾²½ÖèµÄ¼ì²é, Ìá¸ß¼ÓÔØËÙ¶È
+		//å…ˆæ£€æŸ¥æœ¬è¯¥æ–‡ä»¶æ˜¯å¦å·²ç»å­˜åœ¨, å¦‚æœå·²ç»å­˜åœ¨åˆ™ä¸éœ€è¦åŠ è½½
+		//ç¬¬ä¸€æ¬¡çš„å…¨é‡åŠ è½½ä¸è¿›è¡Œæœ¬æ­¥éª¤çš„æ£€æŸ¥, æé«˜åŠ è½½é€Ÿåº¦
 		if (!initial_load)
 		{
 			tmpObj = get_file(iter->name.c_str());
@@ -510,7 +510,7 @@ int OssFS::load_files(vector<oss_object_desc_t>& objects, bool initial_load, siz
 			if (tmpObj != NULL)
 			{
 
-				//ÏÈÅĞ¶Ï¸ÃÎÄ¼şÊÇ·ñÒÑ¾­±»´ò¿ª¶ÁĞ´, Èç¹ûÒÑ¾­±»´ò¿ª, Ôò±£³Ö¸ÃÎÄ¼ş×´Ì¬²»±ä»¯
+				//å…ˆåˆ¤æ–­è¯¥æ–‡ä»¶æ˜¯å¦å·²ç»è¢«æ‰“å¼€è¯»å†™, å¦‚æœå·²ç»è¢«æ‰“å¼€, åˆ™ä¿æŒè¯¥æ–‡ä»¶çŠ¶æ€ä¸å˜åŒ–
 				if (tmpObj->is_open())
 				{
 					log_error("file [%s] is opened, ignore it", iter->name.c_str());
@@ -521,9 +521,9 @@ int OssFS::load_files(vector<oss_object_desc_t>& objects, bool initial_load, siz
 					continue;
 				}
 			
-				/* obj¿ÉÄÜÊÇÄ¿Â¼, ÆÕÍ¨ÎÄ¼ş, Á´½ÓÎÄ¼şµÄÈÎÒâÒ»ÖÖ
-				   Ä¿Â¼: ÉèÖÃÍ¬²½±êÊ¶, Ö±½ÓÌø¹ı
-				   ÆÕÍ¨ÎÄ¼şÓëÁ´½ÓÎÄ¼ş: Èç¹ûÎÄ¼şÎÄ¼ş´óĞ¡²»Ò»ÖÂ, Ö±½ÓÉ¾³ıcloudfsÖĞµÄ¶ÔÏó, ÖØĞÂ´´½¨Ò»¸öĞÂµÄ¶ÔÏó
+				/* objå¯èƒ½æ˜¯ç›®å½•, æ™®é€šæ–‡ä»¶, é“¾æ¥æ–‡ä»¶çš„ä»»æ„ä¸€ç§
+				   ç›®å½•: è®¾ç½®åŒæ­¥æ ‡è¯†, ç›´æ¥è·³è¿‡
+				   æ™®é€šæ–‡ä»¶ä¸é“¾æ¥æ–‡ä»¶: å¦‚æœæ–‡ä»¶æ–‡ä»¶å¤§å°ä¸ä¸€è‡´, ç›´æ¥åˆ é™¤cloudfsä¸­çš„å¯¹è±¡, é‡æ–°åˆ›å»ºä¸€ä¸ªæ–°çš„å¯¹è±¡
 				*/				
 				OssStats *pTmpStat = const_cast<OssStats *>(tmpObj->get_stats());
 				if (pTmpStat->type == OSS_DIR)
@@ -537,7 +537,7 @@ int OssFS::load_files(vector<oss_object_desc_t>& objects, bool initial_load, siz
 				}				
 				else if ((pTmpStat->type == OSS_REGULAR) || (pTmpStat->type == OSS_LINK))
 				{														
-					//ºóÌ¨ÎÄ¼şÓëÇ°Ì¨ÎÄ¼şÒ»ÖÂ, Ö±½Ócontinue					
+					//åå°æ–‡ä»¶ä¸å‰å°æ–‡ä»¶ä¸€è‡´, ç›´æ¥continue					
 					if (pTmpStat->get_size() == iter->size) 
 					{
 						if (sync_flag != 0)
@@ -550,8 +550,8 @@ int OssFS::load_files(vector<oss_object_desc_t>& objects, bool initial_load, siz
 					log_error("file [%s] in OSS size[%zd] is different from cloudfs size[%zd], updating ...", 
 									iter->name.c_str(), iter->size, pTmpStat->get_size());
 					
-					//ºóÌ¨ÎÄ¼şÓëÇ°Ì¨ÎÄ¼ş²»Ò»ÖÂ, É¾³ıÇ°Ì¨¶ÔÏó, ºóÃæ»áÖØĞÂ´´½¨¸Ã¶ÔÏó
-					//É¾³ıÉÏ²ãÄ¿Â¼±íÖĞ¸Ã¶ÔÏóµÄĞÅÏ¢
+					//åå°æ–‡ä»¶ä¸å‰å°æ–‡ä»¶ä¸ä¸€è‡´, åˆ é™¤å‰å°å¯¹è±¡, åé¢ä¼šé‡æ–°åˆ›å»ºè¯¥å¯¹è±¡
+					//åˆ é™¤ä¸Šå±‚ç›®å½•è¡¨ä¸­è¯¥å¯¹è±¡çš„ä¿¡æ¯
 					OssDirObject * parent_dir = (OssDirObject *)get_parent(iter->name.c_str());
 					if (parent_dir != NULL)
 					{
@@ -582,11 +582,11 @@ int OssFS::load_files(vector<oss_object_desc_t>& objects, bool initial_load, siz
 			log_debug("stats.size:[%d]", stats.size);
 			create_group_stats(stats.size, 0, group_stats);
 			tmpObj = this->add_file(iter->name.c_str(), group_stats, stats.type);
-			//subobject²»ÔÙĞèÒª±£´æstats, ´Ë´¦Ñ­»·ÊÍ·ÅËùÓĞµÄstat
+			//subobjectä¸å†éœ€è¦ä¿å­˜stats, æ­¤å¤„å¾ªç¯é‡Šæ”¾æ‰€æœ‰çš„stat
 			delete_group_stats(group_stats);
 			
 		}
-		//Ôö¼Ó¶ÔLINKÎÄ¼şµÄ³õÊ¼»¯´¦Àí
+		//å¢åŠ å¯¹LINKæ–‡ä»¶çš„åˆå§‹åŒ–å¤„ç†
 		else if (stats.type == OSS_DIR)
 		{
 			tmpObj = this->add_file(iter->name.c_str(), group_stats, stats.type);
@@ -602,7 +602,7 @@ int OssFS::load_files(vector<oss_object_desc_t>& objects, bool initial_load, siz
 			log_error("invalid stats.type %d", stats.type);
 		}
 
-		/* ¼ì²éadd_fileµÄ½á¹û, ²¢ÉèÖÃ¶ÔÓ¦µÄsync_flag */
+		/* æ£€æŸ¥add_fileçš„ç»“æœ, å¹¶è®¾ç½®å¯¹åº”çš„sync_flag */
 		if (tmpObj != NULL)
 		{
 			if (sync_flag != 0)
@@ -692,31 +692,31 @@ OssObject* OssFS::find_file(const char* path)
 	int res = 0;
 	size_t sync_flag = 0;
 
-	//ÏÈÔÚÄÚ´æÖĞ²éÕÒ, ÄÜÕÒµ½Ö±½Ó·µ»Ø¶ÔÏó
+	//å…ˆåœ¨å†…å­˜ä¸­æŸ¥æ‰¾, èƒ½æ‰¾åˆ°ç›´æ¥è¿”å›å¯¹è±¡
 	OssObject* obj = get_file(path);
 	if (obj != NULL)
 	{
 		return obj;
 	}	
 
-	//Èç¹ûÄÚ´æÖĞÕÒ²»µ½, ÔÙÅĞ¶ÏÊÇ·ñĞèÒªµ½OSS¼ì²é¶ÔÏóÊÇ·ñ´æÔÚ
+	//å¦‚æœå†…å­˜ä¸­æ‰¾ä¸åˆ°, å†åˆ¤æ–­æ˜¯å¦éœ€è¦åˆ°OSSæ£€æŸ¥å¯¹è±¡æ˜¯å¦å­˜åœ¨
 	if (0 == AliConf::IMMEDIATE_SYNC)
 	{
 		return NULL;
 	}
 
-	/*µ½OSS»ñÈ¡¶ÔÏó, ±¾º¯ÊıÓÃÓÚgetattr/chown/chmodµÈ²»È·¶¨ÊÇÎÄ¼ş»¹ÊÇÎÄ¼ş¼ĞµÄÂ·¾¶
-	  ¸ù¾İÊäÈëµÄÂ·¾¶ĞèÒª²éÕÒÁ½±é */
+	/*åˆ°OSSè·å–å¯¹è±¡, æœ¬å‡½æ•°ç”¨äºgetattr/chown/chmodç­‰ä¸ç¡®å®šæ˜¯æ–‡ä»¶è¿˜æ˜¯æ–‡ä»¶å¤¹çš„è·¯å¾„
+	  æ ¹æ®è¾“å…¥çš„è·¯å¾„éœ€è¦æŸ¥æ‰¾ä¸¤é */
 	vector<oss_object_desc_t> object_list;
 	oss_object_desc_t out_put;
 
 	res = m_oss->get_object_meta(AliConf::BUCKET.c_str(), 
 						  		path,
 						  		out_put);
-	//´Ë´¦²éÑ¯Ê§°Ü, ËµÃ÷¶ÔÓ¦pathµÄÎÄ¼ş¶ÔÏó²»´æÔÚ
+	//æ­¤å¤„æŸ¥è¯¢å¤±è´¥, è¯´æ˜å¯¹åº”pathçš„æ–‡ä»¶å¯¹è±¡ä¸å­˜åœ¨
 	if (0 != res)
 	{
-		//³¢ÊÔÒÔÄ¿Â¼¶ÔÏóµÄĞÎÊ½ÔÙ²éÑ¯Ò»´Î
+		//å°è¯•ä»¥ç›®å½•å¯¹è±¡çš„å½¢å¼å†æŸ¥è¯¢ä¸€æ¬¡
 		string tmp1 = path;
 		string tmp2 = "/";
 		string dir_path = tmp1 + tmp2;
@@ -816,7 +816,7 @@ int OssFS::mkdir(const char *path, mode_t mode)
 	}
 
 	OSS_FILE_META meta;
-	obj->get_stats()->to_meta(meta);
+	obj->get_stats()->to_meta(meta)
     m_oss->put_object_data(AliConf::BUCKET.c_str(), obj->get_path_name(), meta);
 
 
@@ -865,8 +865,8 @@ int OssFS::symlink(const char *path, const char *link)
 	log_debug("path:%s", path);
 	std::vector<OssStats *> sym_stats;
 
-	//ÔÚ´Ë´¦Ôö¼Ólink_statsµÄÄ¿µÄÊÇÎªÁËÉèÖÃlink statsµÄÊµ¼Ê³¤¶È, ²¢ÔÚOssSymObject
-	//³õÊ¼»¯Ê±·ÖÅäÏàÓ¦³¤¶ÈµÄÄÚ´æ
+	//åœ¨æ­¤å¤„å¢åŠ link_statsçš„ç›®çš„æ˜¯ä¸ºäº†è®¾ç½®link statsçš„å®é™…é•¿åº¦, å¹¶åœ¨OssSymObject
+	//åˆå§‹åŒ–æ—¶åˆ†é…ç›¸åº”é•¿åº¦çš„å†…å­˜
 	int path_len = strlen(path);
 	
 
@@ -963,7 +963,7 @@ int OssFS::rename(const char *path, const char *newpath)
 		return ret;
 	}
 
-	//É¾³ıÀÏÎÄ¼ş
+	//åˆ é™¤è€æ–‡ä»¶
 	this->del_file(path);	
 	return ret;
 }
@@ -991,7 +991,7 @@ int OssFS::link(const char *path, const char *newpath)
 	const OssStats *old_stats = old_obj->get_stats();
 	std::vector<OssStats *> stats;
 
-	//µ±Ç°²»Ö§³ÖĞŞ¸ÄÎÄ¼ş¼ĞÃû³Æ, ÒòÎªÎÄ¼ş¼Ğ¸ÄÃûÓ°ÏìÌ«´ó, ĞèÒª½«OSSÉÏ¸ÃÎÄ¼ş¼ĞÏÂµÄ¶ÔÏóÈ«²¿±éÀúÒ»±é
+	//å½“å‰ä¸æ”¯æŒä¿®æ”¹æ–‡ä»¶å¤¹åç§°, å› ä¸ºæ–‡ä»¶å¤¹æ”¹åå½±å“å¤ªå¤§, éœ€è¦å°†OSSä¸Šè¯¥æ–‡ä»¶å¤¹ä¸‹çš„å¯¹è±¡å…¨éƒ¨éå†ä¸€é
     if (old_stats->type == OSS_DIR) 
 	{
        log_debug("Now not support rename a directory.");
@@ -1019,7 +1019,7 @@ int OssFS::link(const char *path, const char *newpath)
 		newname = newname.substr(1);	
 	}
 	
-	// Í¬²½OSSºóÌ¨Êı¾İ, µ±ÎÄ¼şĞ¡ÓÚ»òµÈÓÚÒ»¸ö¿éÊ±, Ê¹ÓÃcopy_object; ´óÓÚ1¸ö¿éÊ¹ÓÃmulti_part½Ó¿Ú¼Ó¿ìÉÏ´«ËÙ¶È
+	// åŒæ­¥OSSåå°æ•°æ®, å½“æ–‡ä»¶å°äºæˆ–ç­‰äºä¸€ä¸ªå—æ—¶, ä½¿ç”¨copy_object; å¤§äº1ä¸ªå—ä½¿ç”¨multi_partæ¥å£åŠ å¿«ä¸Šä¼ é€Ÿåº¦
 	if (old_stats->size <= AliConf::BLOCK_SIZE) {
     	old_obj->copy(newname.c_str());
 	}
@@ -1061,7 +1061,7 @@ int OssFS::truncate(const char *path, off_t newSize) {
 		return -ENOENT;	
 	}
 
-	//ÎÒÃÇÔÚÕâÀïÏÈÅĞ¶ÏÕâ¸öÎÄ¼şÀàĞÍ, cloudfsÄ¿Ç°Ö»Ö§³ÖÆÕÍ¨ÎÄ¼şµÄtruncate
+	//æˆ‘ä»¬åœ¨è¿™é‡Œå…ˆåˆ¤æ–­è¿™ä¸ªæ–‡ä»¶ç±»å‹, cloudfsç›®å‰åªæ”¯æŒæ™®é€šæ–‡ä»¶çš„truncate
 	if (obj->get_stats()->type != OSS_REGULAR)
 	{
 		log_debug("Error Truncate type");
@@ -1214,7 +1214,7 @@ int OssFS::readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	(void) offset;
 	(void) fileInfo;
 
-	//ÏÈ×¼±¸Á½¸ö×ÓÄ¿Â¼, µ±Ç°×ÓÄ¿Â¼ºÍÉÏ¼¶Ä¿Â¼
+	//å…ˆå‡†å¤‡ä¸¤ä¸ªå­ç›®å½•, å½“å‰å­ç›®å½•å’Œä¸Šçº§ç›®å½•
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
 
@@ -1225,12 +1225,12 @@ int OssFS::readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		
 	if (strcmp(path, "/") == 0) 
 	{
-		//¸ùÄ¿Â¼²»ĞèÒªÉèÖÃPrefix
+		//æ ¹ç›®å½•ä¸éœ€è¦è®¾ç½®Prefix
 		Prefix = "";					
 	} 
 	else
 	{
-		//·Ç¸ùÄ¿Â¼, prefix×é×°ĞÎÊ½Îªfun/Ä£Ê½
+		//éæ ¹ç›®å½•, prefixç»„è£…å½¢å¼ä¸ºfun/æ¨¡å¼
 		Prefix = (path+1);
 		Prefix = Prefix + "/";		
 	}
@@ -1241,10 +1241,10 @@ int OssFS::readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
 	int is_syncd = 0;
 	
-	//¼ì²éÍ¬²½Ê±¼äÅäÖÃ, Èç¹ûÊ±¼ä¼ä¸ô²»Îª0, Ôò°´ÕÕÅäÖÃ½øĞĞÎÄ¼ş¼Ğ·ÃÎÊÊ±¼äË¢ĞÂ
+	//æ£€æŸ¥åŒæ­¥æ—¶é—´é…ç½®, å¦‚æœæ—¶é—´é—´éš”ä¸ä¸º0, åˆ™æŒ‰ç…§é…ç½®è¿›è¡Œæ–‡ä»¶å¤¹è®¿é—®æ—¶é—´åˆ·æ–°
 	if (AliConf::ONLINE_SYNC_CYCLE != 0)
 	{
-		//pTargetDirÊÇµ±Ç°Òª¶ÁÈ¡µÄÄ¿Â¼¶ÔÏó, ÅĞ¶Ïµ±Ç°²Ù×÷ÓëÉÏÒ»´Î²Ù×÷µÄÊ±¼ä¼ä¸ô
+		//pTargetDiræ˜¯å½“å‰è¦è¯»å–çš„ç›®å½•å¯¹è±¡, åˆ¤æ–­å½“å‰æ“ä½œä¸ä¸Šä¸€æ¬¡æ“ä½œçš„æ—¶é—´é—´éš”
 		OssStats *pStat = (OssStats *)pTargetDir->get_stats();
 		time_t current_time = time(0);
 		vector<oss_object_desc_t> object_list;
@@ -1259,18 +1259,18 @@ int OssFS::readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 							  object_list);
 			if (ret_code != 0)
 			{
-				//Èç¹ûÏòOSSÇëÇó¸üĞÂÄ¿Â¼×ÓÎÄ¼şÓë×ÓÄ¿Â¼Ê§°Ü, ¼ÇÂ¼errorÈÕÖ¾, °´ÕÕÒÑÓĞµÄ»º´æÊı¾İ¼ÌĞø´¦Àí
+				//å¦‚æœå‘OSSè¯·æ±‚æ›´æ–°ç›®å½•å­æ–‡ä»¶ä¸å­ç›®å½•å¤±è´¥, è®°å½•erroræ—¥å¿—, æŒ‰ç…§å·²æœ‰çš„ç¼“å­˜æ•°æ®ç»§ç»­å¤„ç†
 				log_error("get_bucket failed");
 			}
 			else
 			{
-				//¸üĞÂ¶ÔÏóµÄ·ÃÎÊÊ±¼ä
+				//æ›´æ–°å¯¹è±¡çš„è®¿é—®æ—¶é—´
 				pStat->mtime = current_time;
 				
-				//¸üĞÂload¹ıÀ´µÄÎÄ¼ş
+				//æ›´æ–°loadè¿‡æ¥çš„æ–‡ä»¶
 				load_files(object_list, false, pTargetDir->get_sync_flag());
 
-				//ÓÃÓÚÏÂÃæº¯ÊıÅĞ¶ÏÊÇ·ñ½øĞĞÁËÒ»´ÎÍ¬²½
+				//ç”¨äºä¸‹é¢å‡½æ•°åˆ¤æ–­æ˜¯å¦è¿›è¡Œäº†ä¸€æ¬¡åŒæ­¥
 				is_syncd = 1;
 			}			
 		}
@@ -1281,7 +1281,7 @@ int OssFS::readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	vector<const char *> vecDel;
 	vector<const char *>::iterator vec_iter;
 
-	//±éÀúÄ¿Â¼µÄmap½á¹¹, ÆôÓÃÄ¿Â¼µÄ¶ÁËø
+	//éå†ç›®å½•çš„mapç»“æ„, å¯ç”¨ç›®å½•çš„è¯»é”
 	((OssDirObject *)pTargetDir)->rdlock();
 	for (it = target_dir->begin(); it != target_dir->end(); it++) 
 	{
@@ -1289,7 +1289,7 @@ int OssFS::readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
 		if (1 == is_syncd)
 		{
-			// ±¾´Îreaddir½øĞĞ¹ıÊı¾İÍ¬²½
+			// æœ¬æ¬¡readdirè¿›è¡Œè¿‡æ•°æ®åŒæ­¥
 			if (tmpObj->get_sync_flag() == pTargetDir->get_sync_flag()) 
 			{
 				filler(buf, it->first, NULL, 0);
@@ -1302,13 +1302,13 @@ int OssFS::readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		}
 		else
 		{
-			// ±¾´ÎreaddirÃ»ÓĞ½øĞĞ¹ıÊı¾İÍ¬²½, ²»ĞèÒª±È½ÏÍ¬²½flag
+			// æœ¬æ¬¡readdiræ²¡æœ‰è¿›è¡Œè¿‡æ•°æ®åŒæ­¥, ä¸éœ€è¦æ¯”è¾ƒåŒæ­¥flag
 			filler(buf, it->first, NULL, 0);
 		}
 		
 	}
 
-	//±éÀú½áÊø, ¹Ø±ÕËø
+	//éå†ç»“æŸ, å…³é—­é”
 	((OssDirObject *)pTargetDir)->unlock();
 
 	for (vec_iter = vecDel.begin(); vec_iter != vecDel.end(); vec_iter++) {
@@ -1411,7 +1411,7 @@ void OssFS::init(struct fuse_conn_info *conn) {
 	if (s != 0)
 		handle_error_en(s, "pthread_create");
 
-	// ³õÊ¼»¯Ïß³Ì³Ø£¬´¦Àí upload_part ÊÂ¼ş
+	// åˆå§‹åŒ–çº¿ç¨‹æ± ï¼Œå¤„ç† upload_part äº‹ä»¶
 	m_pool = thpool_init(AliConf::MAX_UPLOAD_THREADS);
 	if (m_pool == NULL)
 	{
